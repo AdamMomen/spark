@@ -4,11 +4,11 @@ This example creates a cool startup animation using the WorkshopESP library.
 
 ## Features
 
-- **ASCII Art Display**: Shows "IoT WORKSHOP" in ASCII art
+- **OLED Animation**: Cool animations designed for 0.96" OLED screen (128x64)
 - **Team Welcome**: Displays team name and member names
 - **LED Patterns**: Cool LED light shows
 - **System Status**: Shows system readiness
-- **OLED Animation**: Uses the OLED display for visual effects
+- **Screen-Friendly**: All text fits perfectly on small display
 
 ## Usage
 
@@ -39,7 +39,7 @@ This example creates a cool startup animation using the WorkshopESP library.
 
 ## Animation Sequence
 
-1. **ASCII Art**: Displays "IoT WORKSHOP" in ASCII characters
+1. **OLED Animation**: Displays workshop info in screen-friendly format
 2. **Team Welcome**: Shows team name and member names
 3. **LED Patterns**: 
    - Alternating red/green blink
