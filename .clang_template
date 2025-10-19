@@ -1,0 +1,14 @@
+-I/Users/adam/projects/iot/include
+-I/Users/adam/projects/iot/src
+-I/Users/adam/.platformio/packages/framework-arduinoespressif8266/cores/esp8266
+-I/Users/adam/.platformio/packages/framework-arduinoespressif8266/variants/nodemcu
+-I/Users/adam/.platformio/packages/framework-arduinoespressif8266/tools/sdk/include
+-I/Users/adam/.platformio/packages/framework-arduinoespressif8266/libraries/ArduinoOTA
+-I/Users/adam/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WiFi/src
+-I/Users/adam/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266mDNS/src
+-DARDUINO_ARCH_ESP8266
+-DESP8266
+-DARDUINO=10805
+-DF_CPU=80000000L
+-DPLATFORMIO=60118
+-w

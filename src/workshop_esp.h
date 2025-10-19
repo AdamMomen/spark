@@ -3,6 +3,7 @@
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Arduino.h>
 #include <ArduinoOTA.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
@@ -14,19 +15,19 @@ private:
   Adafruit_SSD1306 *display;
 
   // LED pins
-  int redLEDPin = D2;
-  int greenLEDPin = D3;
+  int redLEDPin;
+  int greenLEDPin;
 
   // LED states
-  bool redLEDState = false;
-  bool greenLEDState = false;
+  bool redLEDState;
+  bool greenLEDState;
 
   // WiFi credentials
   const char *ssid;
   const char *password;
 
   // OTA password
-  const char *otaPassword = "workshop123";
+  const char *otaPassword;
 
   // Display settings
   static const int SCREEN_WIDTH = 128;

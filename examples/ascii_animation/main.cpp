@@ -1,4 +1,4 @@
-#include "workshop_esp.h"
+#include "../../src/workshop_esp.h"
 #include <Arduino.h>
 
 // WorkshopESP instance

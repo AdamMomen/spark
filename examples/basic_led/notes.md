@@ -1,9 +1,24 @@
-Notes to modify
+### Noets
+
+Before uploading we need to specify the port to find the port run the following command
+
+```bash
+ls /dev/cu.*
+```
 
 
-- Didn't find the following directories in examples directory
-- `dashboard_template
-- `ota_update`
+# Install libraries
+
+The following command will check program size also download packages along the way
+
+```bash
+pio run --target checkprogsize
+```
 
 
-- in example readme each example has the same run code. How to run specific file with pio if that is not possible then don't repeat yourself in docs
+### Fix linting errors
+Step 1: run this command
+```bash
+pio run --target checkprogsize
+```
+Step 2: Pres cmd+shift+p then choose `Restart Window` command from the list

@@ -4,6 +4,13 @@ WorkshopESP::WorkshopESP() {
   server = new ESP8266WebServer(80);
   display =
       new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+  // Initialize member variables
+  redLEDPin = D2;
+  greenLEDPin = D3;
+  redLEDState = false;
+  greenLEDState = false;
+  otaPassword = "workshop123";
 }
 
 WorkshopESP::~WorkshopESP() {
