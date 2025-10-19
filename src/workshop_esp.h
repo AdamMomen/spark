@@ -33,6 +33,8 @@ private:
   static const int SCREEN_WIDTH = 128;
   static const int SCREEN_HEIGHT = 64;
   static const int OLED_RESET = -1;
+  static const int OLED_SDA = 14; // GPIO14 (correct pin)
+  static const int OLED_SCL = 12; // GPIO12 (correct pin)
 
 public:
   WorkshopESP();
@@ -52,6 +54,7 @@ public:
   bool getLEDState(int ledNumber);
 
   // Display methods
+  // void clearDisplay();
   void displayWelcome(const char *teamName, const char *member1,
                       const char *member2);
   void displayStatus();
@@ -72,6 +75,10 @@ public:
 
   // Team welcome animation
   void animateTeamWelcome(const char *teamName);
+
+  // Complete animation sequence
+  void playCompleteAnimation(const char *teamName, const char *member1,
+                             const char *member2);
 };
 
 #endif

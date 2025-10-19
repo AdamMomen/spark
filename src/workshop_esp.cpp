@@ -2,6 +2,10 @@
 
 WorkshopESP::WorkshopESP() {
   server = new ESP8266WebServer(80);
+
+  // Initialize I2C with custom pins
+  Wire.begin(OLED_SDA, OLED_SCL);
+
   display =
       new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -23,12 +27,36 @@ void WorkshopESP::setupWiFi(const char *ssid, const char *password) {
   this->password = password;
 
   Serial.println("Connecting to WiFi...");
+
+  // Display WiFi connection start
+  display->clearDisplay();
+  display->setTextSize(1);
+  display->setTextColor(SSD1306_WHITE);
+  display->setCursor(0, 0);
+  display->println("Connecting to WiFi");
+  display->setCursor(0, 15);
+  display->printf("SSID: %s", ssid);
+  display->setCursor(0, 30);
+  display->println("Please wait...");
+  display->display();
+
   WiFi.begin(ssid, password);
 
   int attempts = 0;
   while (WiFi.status() != WL_CONNECTED && attempts < 20) {
     delay(500);
     Serial.print(".");
+
+    // Update display with connection progress
+    display->setCursor(0, 45);
+    display->printf("Attempt %d/20", attempts + 1);
+    display->setCursor(0, 55);
+    display->print("Connecting");
+    for (int i = 0; i < (attempts % 4); i++) {
+      display->print(".");
+    }
+    display->display();
+
     attempts++;
   }
 
@@ -38,8 +66,39 @@ void WorkshopESP::setupWiFi(const char *ssid, const char *password) {
     Serial.println(WiFi.localIP());
     Serial.print("MAC Address: ");
     Serial.println(WiFi.macAddress());
+
+    // Display success message
+    display->clearDisplay();
+    display->setTextSize(1);
+    display->setTextColor(SSD1306_WHITE);
+    display->setCursor(0, 0);
+    display->println("WiFi Connected!");
+    display->setCursor(0, 15);
+    display->printf("IP: %s", WiFi.localIP().toString().c_str());
+    display->setCursor(0, 30);
+    display->printf("Signal: %d dBm", WiFi.RSSI());
+    display->setCursor(0, 45);
+    display->println("Ready for workshop!");
+    display->display();
+    delay(2000);
+
   } else {
     Serial.println("\nWiFi Connection Failed!");
+
+    // Display failure message
+    display->clearDisplay();
+    display->setTextSize(1);
+    display->setTextColor(SSD1306_WHITE);
+    display->setCursor(0, 0);
+    display->println("WiFi Failed!");
+    display->setCursor(0, 15);
+    display->println("Check credentials");
+    display->setCursor(0, 30);
+    display->println("or network");
+    display->setCursor(0, 45);
+    display->println("Continuing offline...");
+    display->display();
+    delay(2000);
   }
 }
 
@@ -98,8 +157,17 @@ void WorkshopESP::setupOTA() {
 }
 
 void WorkshopESP::setupDisplay() {
+  Serial.println("Initializing OLED display...");
+  Serial.printf("Using SDA: D%d (GPIO%d), SCL: D%d (GPIO%d)\n", OLED_SDA,
+                OLED_SDA, OLED_SCL, OLED_SCL);
+
   if (!display->begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println("SSD1306 allocation failed");
+    Serial.println("SSD1306 allocation failed - Check wiring!");
+    Serial.println("Make sure OLED is connected to:");
+    Serial.printf("  SDA -> D%d (GPIO%d)\n", OLED_SDA, OLED_SDA);
+    Serial.printf("  SCL -> D%d (GPIO%d)\n", OLED_SCL, OLED_SCL);
+    Serial.println("  VCC -> 3.3V");
+    Serial.println("  GND -> GND");
     return;
   }
 
@@ -111,7 +179,7 @@ void WorkshopESP::setupDisplay() {
   display->println("Initializing...");
   display->display();
 
-  Serial.println("OLED Display initialized");
+  Serial.println("OLED Display initialized successfully!");
 }
 
 void WorkshopESP::setupLEDs() {
@@ -167,6 +235,11 @@ bool WorkshopESP::getLEDState(int ledNumber) {
   return false;
 }
 
+// void WorkshopESP::clearDisplay() {
+//   display->clearDisplay();
+//   display->display();
+// }
+
 void WorkshopESP::displayWelcome(const char *teamName, const char *member1,
                                  const char *member2) {
   display->clearDisplay();
@@ -195,9 +268,15 @@ void WorkshopESP::displayStatus() {
   display->setTextColor(SSD1306_WHITE);
 
   display->setCursor(0, 0);
-  display->printf("WiFi: %s\n", WiFi.status() == WL_CONNECTED ? "OK" : "FAIL");
-  display->printf("IP: %s\n", WiFi.localIP().toString().c_str());
-  display->printf("Uptime: %lu\n", millis() / 1000);
+  if (WiFi.status() == WL_CONNECTED) {
+    display->printf("WiFi: Connected\n");
+    display->printf("IP: %s\n", WiFi.localIP().toString().c_str());
+    display->printf("Signal: %d dBm\n", WiFi.RSSI());
+  } else {
+    display->printf("WiFi: Disconnected\n");
+    display->printf("SSID: %s\n", ssid);
+  }
+  display->printf("Uptime: %lu s\n", millis() / 1000);
   display->printf("Free Heap: %u\n", ESP.getFreeHeap());
   display->printf("Red LED: %s\n", redLEDState ? "ON" : "OFF");
   display->printf("Green LED: %s\n", greenLEDState ? "ON" : "OFF");
@@ -242,6 +321,53 @@ void WorkshopESP::animateTeamWelcome(const char *teamName) {
 
   // Show status
   displayStatus();
+}
+
+void WorkshopESP::playCompleteAnimation(const char *teamName,
+                                        const char *member1,
+                                        const char *member2) {
+  Serial.println("Starting complete animation sequence...");
+
+  // Cool Animation for 0.96" OLED Screen
+  const char *animationFrames[] = {"IoT Workshop",
+                                   "October 2025",
+                                   "Network School",
+                                   "",
+                                   "Ready to",
+                                   "Build IoT!",
+                                   "",
+                                   "Let's Start!",
+                                   "🚀"};
+
+  // Display animation frames
+  for (int frame = 0; frame < 3; frame++) {
+    for (int i = 0; i < 9; i++) {
+      displayMessage(animationFrames[i]);
+      delay(600);
+    }
+    delay(1000);
+  }
+
+  // Display team welcome
+  displayWelcome(teamName, member1, member2);
+  delay(3000);
+
+  // Display cool patterns
+  const char *patterns[] = {"Pattern 1", "Pattern 2", "Pattern 3"};
+
+  for (int i = 0; i < 3; i++) {
+    displayMessage(patterns[i]);
+    delay(1000);
+  }
+
+  // Display system info
+  displayStatus();
+  delay(2000);
+
+  // Final animated welcome
+  animateTeamWelcome(teamName);
+
+  Serial.println("Complete animation sequence finished!");
 }
 
 void WorkshopESP::handleRoot() {

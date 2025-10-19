@@ -58,6 +58,62 @@ Example showing Over-The-Air update functionality.
 pio run -e nodemcuv2 -t upload
 ```
 
+### 5. ASCII Animation (`ascii_animation/`)
+Cool startup animation for OLED and LEDs.
+
+**Features:**
+- Screen-friendly animations
+- Team welcome messages
+- System status display
+- LED patterns
+
+**Usage:**
+```bash
+pio run -e nodemcuv2 -t upload
+```
+
+### 6. OLED Test (`oled_test/`)
+OLED display test with custom I2C pins.
+
+**Features:**
+- Custom I2C pin configuration (D5=SCL, D6=SDA)
+- Display test with debug output
+- Blinking indicator
+- Wiring verification
+
+**Usage:**
+```bash
+pio run -e nodemcuv2 -t upload
+```
+
+### 7. Power Test (`power_test/`)
+Basic power and connection test.
+
+**Features:**
+- Built-in LED test
+- I2C pin state checking
+- Wiring verification
+- Power diagnostics
+
+**Usage:**
+```bash
+pio run -e nodemcuv2 -t upload
+```
+
+### 8. I2C Scanner (`i2c_scanner/`)
+I2C device detection and scanning.
+
+**Features:**
+- I2C device discovery
+- Address scanning
+- Device identification
+- Continuous monitoring
+
+**Usage:**
+```bash
+pio run -e nodemcuv2 -t upload
+```
+
 ## How to Use Examples
 
 1. Copy example code to `src/main.cpp`
@@ -78,7 +134,14 @@ Each example can be customized for your team:
 
 ## Next Steps
 
-1. Start with `basic_led` to test hardware
+**If OLED not working:**
+1. Start with `power_test` to check basic connections
+2. Use `i2c_scanner` to detect OLED on I2C bus
+3. Try `oled_test` to verify display functionality
+
+**If OLED working:**
+1. Try `basic_led` to test LED connections
 2. Move to `web_control` for API development
 3. Use `dashboard_template` for the challenge
-4. Explore `ota_update` for advanced features
+4. Explore `ascii_animation` for cool effects
+5. Learn `ota_update` for advanced features
