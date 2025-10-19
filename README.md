@@ -7,7 +7,12 @@ ESP8266-based IoT workshop materials for hands-on learning.
 **Date**: October 19, 2025  
 **Venue**: Network School, Johor, Malaysia  
 **Duration**: 4 hours  
-**Teams**: 4 teams of 2 participants each  
+### **Teams**
+- Team A: Akshat & Jarrett
+- Team B: Mark & Björn
+- Team C: Swayam, Vamsi & Kaya
+
+**Participants:** 7 attendees
 **Hardware**: ESP8266MOD + OLED display boards
 
 ## Workshop Schedule

@@ -26,7 +26,7 @@ void WorkshopESP::setupWiFi(const char *ssid, const char *password) {
   this->ssid = ssid;
   this->password = password;
 
-  Serial.println("Connecting to WiFi...");
+  Serial.println("Starting WiFi setup...");
 
   // Display WiFi connection start
   display->clearDisplay();
@@ -37,35 +37,56 @@ void WorkshopESP::setupWiFi(const char *ssid, const char *password) {
   display->setCursor(0, 15);
   display->printf("SSID: %s", ssid);
   display->setCursor(0, 30);
-  display->println("Please wait...");
+  display->println("Initializing...");
   display->display();
 
+  // Set WiFi mode and disconnect any existing connection
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+
+  Serial.println("WiFi mode set to STA");
+
+  // Begin WiFi connection with timeout
   WiFi.begin(ssid, password);
+  Serial.println("WiFi.begin() called");
 
   int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
-    delay(500);
-    Serial.print(".");
+  int maxAttempts = 10; // Reduced attempts to prevent hanging
+
+  while (WiFi.status() != WL_CONNECTED && attempts < maxAttempts) {
+    delay(1000); // Increased delay for stability
+    Serial.printf("WiFi status: %d, attempt %d/%d\n", WiFi.status(),
+                  attempts + 1, maxAttempts);
 
     // Update display with connection progress
     display->setCursor(0, 45);
-    display->printf("Attempt %d/20", attempts + 1);
+    display->printf("Attempt %d/%d", attempts + 1, maxAttempts);
     display->setCursor(0, 55);
     display->print("Connecting");
-    for (int i = 0; i < (attempts % 4); i++) {
+    for (int i = 0; i < (attempts % 3); i++) {
       display->print(".");
     }
     display->display();
 
     attempts++;
+
+    // Check for watchdog reset
+    if (attempts % 3 == 0) {
+      Serial.println("Checking system stability...");
+      yield(); // Allow other tasks to run
+    }
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\nWiFi Connected!");
+    Serial.println("\nWiFi Connected Successfully!");
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
     Serial.print("MAC Address: ");
     Serial.println(WiFi.macAddress());
+    Serial.print("Signal Strength: ");
+    Serial.print(WiFi.RSSI());
+    Serial.println(" dBm");
 
     // Display success message
     display->clearDisplay();
@@ -84,6 +105,7 @@ void WorkshopESP::setupWiFi(const char *ssid, const char *password) {
 
   } else {
     Serial.println("\nWiFi Connection Failed!");
+    Serial.printf("Final WiFi status: %d\n", WiFi.status());
 
     // Display failure message
     display->clearDisplay();
@@ -92,14 +114,16 @@ void WorkshopESP::setupWiFi(const char *ssid, const char *password) {
     display->setCursor(0, 0);
     display->println("WiFi Failed!");
     display->setCursor(0, 15);
-    display->println("Check credentials");
+    display->printf("Status: %d", WiFi.status());
     display->setCursor(0, 30);
-    display->println("or network");
+    display->println("Continuing offline");
     display->setCursor(0, 45);
-    display->println("Continuing offline...");
+    display->println("Check network");
     display->display();
     delay(2000);
   }
+
+  Serial.println("WiFi setup complete");
 }
 
 void WorkshopESP::setupWebServer() {
@@ -257,7 +281,7 @@ void WorkshopESP::displayWelcome(const char *teamName, const char *member1,
   display->println(member2);
 
   display->setCursor(0, 55);
-  display->println("Welcome!");
+  display->println("Welcome");
 
   display->display();
 }
@@ -325,49 +349,199 @@ void WorkshopESP::animateTeamWelcome(const char *teamName) {
 
 void WorkshopESP::playCompleteAnimation(const char *teamName,
                                         const char *member1,
-                                        const char *member2) {
-  Serial.println("Starting complete animation sequence...");
+                                        const char *member2,
+                                        const char *member3) {
+  Serial.println("Starting animation sequence...");
 
-  // Cool Animation for 0.96" OLED Screen
-  const char *animationFrames[] = {"IoT Workshop",
-                                   "October 2025",
-                                   "Network School",
-                                   "",
-                                   "Ready to",
-                                   "Build IoT!",
-                                   "",
-                                   "Let's Start!",
-                                   "🚀"};
+  // Phase 1: Boot sequence with loading bars
+  display->clearDisplay();
+  display->setTextSize(2); // Bigger text
+  display->setTextColor(SSD1306_WHITE);
+  display->setCursor(0, 0);
+  display->println("IoT Workshop");
+  display->setCursor(0, 20);
+  display->println("Initializing...");
 
-  // Display animation frames
-  for (int frame = 0; frame < 3; frame++) {
-    for (int i = 0; i < 9; i++) {
-      displayMessage(animationFrames[i]);
-      delay(600);
+  // Animated loading bar
+  for (int i = 0; i <= 100; i += 5) {
+    display->setTextSize(1); // Smaller for loading text
+    display->setCursor(0, 40);
+    display->printf("Loading: %d%%", i);
+    display->setCursor(0, 50);
+    display->print("[");
+    for (int j = 0; j < 20; j++) {
+      if (j < (i / 5)) {
+        display->print("=");
+      } else {
+        display->print(" ");
+      }
     }
-    delay(1000);
+    display->print("]");
+    display->display();
+    delay(100);
   }
 
-  // Display team welcome
-  displayWelcome(teamName, member1, member2);
-  delay(3000);
+  delay(1000);
 
-  // Display cool patterns
-  const char *patterns[] = {"Pattern 1", "Pattern 2", "Pattern 3"};
+  // Phase 2: Matrix-style text effect
+  const char *matrixText[] = {"IoT Workshop"};
+  for (int phase = 0; phase < 2; phase++) {
+    for (int i = 0; i < 3; i++) {
+      display->clearDisplay();
+      display->setTextSize(2); // Bigger text
+      display->setTextColor(SSD1306_WHITE);
 
-  for (int i = 0; i < 3; i++) {
-    displayMessage(patterns[i]);
-    delay(1000);
+      // Typewriter effect
+      String text = matrixText[i];
+      for (int j = 0; j <= text.length(); j++) {
+        display->setCursor(0, 25);
+        display->print(text.substring(0, j));
+        display->setCursor(0, 45);
+        display->print("_");
+        display->display();
+        delay(150);
+      }
+      delay(500);
+    }
   }
 
-  // Display system info
-  displayStatus();
+  // Phase 3: Pulsing welcome
+  for (int pulse = 0; pulse < 5; pulse++) {
+    display->clearDisplay();
+    display->setTextSize(3); // Bigger welcome text
+    display->setTextColor(SSD1306_WHITE);
+    display->setCursor(0, 25);
+    display->println("Welcome!");
+    display->display();
+    delay(300);
+
+    display->clearDisplay();
+    display->display();
+    delay(200);
+  }
+
+  // Phase 4: Team introduction with style
+  display->clearDisplay();
+  display->setTextSize(3); // Big team name
+  display->setTextColor(SSD1306_WHITE);
+  display->setCursor(0, 0);
+  display->println(teamName);
+
+  display->setTextSize(1); // Small member text to fit screen
+  display->setCursor(0, 25);
+  display->println("Members:");
+  display->setCursor(0, 35);
+  display->printf("-- %s", member1);
+  display->setCursor(0, 45);
+  display->printf("-- %s", member2);
+  display->setCursor(0, 55);
+  display->printf("-- %s", member3);
+  display->display();
+  delay(30000); // Show all members for 30 seconds
+
+  // Phase 5: LED light show
+  display->clearDisplay();
+  display->setTextSize(1);
+  display->setTextColor(SSD1306_WHITE);
+  display->setCursor(0, 0);
+  display->println("LED Light Show");
+  display->setCursor(0, 15);
+  display->println("Watch the LEDs!");
+  display->display();
+
+  // LED animation sequence
+  for (int cycle = 0; cycle < 3; cycle++) {
+    // Red LED sequence
+    setLED(1, true);
+    display->setCursor(0, 30);
+    display->println("Red LED ON");
+    display->display();
+    delay(500);
+
+    setLED(1, false);
+    setLED(2, true);
+    display->setCursor(0, 30);
+    display->println("Green LED ON");
+    display->display();
+    delay(500);
+
+    setLED(2, false);
+    setLED(1, true);
+    setLED(2, true);
+    display->setCursor(0, 30);
+    display->println("Both LEDs ON");
+    display->display();
+    delay(500);
+
+    setLED(1, false);
+    setLED(2, false);
+    display->setCursor(0, 30);
+    display->println("LEDs OFF");
+    display->display();
+    delay(300);
+  }
+
+  // Phase 6: System status with animations
+  display->clearDisplay();
+  display->setTextSize(1);
+  display->setTextColor(SSD1306_WHITE);
+  display->setCursor(0, 0);
+  display->println("System Status");
+  display->setCursor(0, 15);
+  display->printf("Uptime: %lu s", millis() / 1000);
+  display->setCursor(0, 25);
+  display->printf("Free RAM: %u", ESP.getFreeHeap());
+  display->setCursor(0, 35);
+  display->println("WiFi: Ready");
+  display->setCursor(0, 45);
+  display->println("OLED: Working");
+  display->setCursor(0, 55);
+  display->println("System: GO!");
+  display->display();
   delay(2000);
 
-  // Final animated welcome
-  animateTeamWelcome(teamName);
+  // Phase 7: Final countdown
+  display->clearDisplay();
+  display->setTextSize(2);
+  display->setTextColor(SSD1306_WHITE);
+  display->setCursor(0, 20);
+  display->println("Starting in");
+  display->display();
+  delay(1000);
 
-  Serial.println("Complete animation sequence finished!");
+  for (int count = 3; count > 0; count--) {
+    display->clearDisplay();
+    display->setTextSize(3);
+    display->setTextColor(SSD1306_WHITE);
+    display->setCursor(50, 25);
+    display->printf("%d", count);
+    display->display();
+    delay(1000);
+  }
+
+  // Final blast
+  display->clearDisplay();
+  display->setTextSize(2);
+  display->setTextColor(SSD1306_WHITE);
+  display->setCursor(0, 20);
+  display->println("LET'S GO!");
+  display->setCursor(0, 40);
+  display->println("IoT Workshop");
+  display->display();
+
+  // Flash LEDs for final effect
+  for (int flash = 0; flash < 5; flash++) {
+    setLED(1, true);
+    setLED(2, true);
+    delay(100);
+    setLED(1, false);
+    setLED(2, false);
+    delay(100);
+  }
+
+  delay(2000);
+
+  Serial.println("WOW animation sequence complete!");
 }
 
 void WorkshopESP::handleRoot() {

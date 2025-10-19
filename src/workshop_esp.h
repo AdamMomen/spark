@@ -78,7 +78,7 @@ public:
 
   // Complete animation sequence
   void playCompleteAnimation(const char *teamName, const char *member1,
-                             const char *member2);
+                             const char *member2, const char *member3);
 };
 
 #endif
