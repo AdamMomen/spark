@@ -114,6 +114,21 @@ I2C device detection and scanning.
 pio run -e nodemcuv2 -t upload
 ```
 
+### 9. Potentiometer Control (`potentiometer_control/`)
+Real-time potentiometer control with WebSocket communication.
+
+**Features:**
+- WebSocket real-time updates
+- Dynamic background color changes
+- Combined LED + potentiometer interface
+- Voltage display and ADC conversion
+- Mobile-responsive design
+
+**Usage:**
+```bash
+pio run -e nodemcuv2 -t upload
+```
+
 ## How to Use Examples
 
 1. Copy example code to `src/main.cpp`
@@ -142,6 +157,7 @@ Each example can be customized for your team:
 **If OLED working:**
 1. Try `basic_led` to test LED connections
 2. Move to `web_control` for API development
-3. Use `dashboard_template` for the challenge
-4. Explore `ascii_animation` for cool effects
-5. Learn `ota_update` for advanced features
+3. Try `potentiometer_control` for real-time sensor data
+4. Use `dashboard_template` for the challenge
+5. Explore `ascii_animation` for cool effects
+6. Learn `ota_update` for advanced features
