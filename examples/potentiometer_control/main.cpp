@@ -12,9 +12,9 @@ const int POT_PIN = A0;
 bool redLEDState = false;
 bool greenLEDState = false;
 
-// WiFi credentials
-const char *WIFI_SSID = "WorkshopWiFi";
-const char *WIFI_PASSWORD = "workshop2025";
+// Access Point settings
+const char *AP_SSID = "IoT-Workshop";
+const char *AP_PASSWORD = ""; // No password
 
 // Web server and WebSocket
 ESP8266WebServer server(80);
@@ -25,18 +25,21 @@ const char *TEAM_NAME = "Team A";
 const char *MEMBER_1 = "Alice";
 const char *MEMBER_2 = "Bob";
 
-void setupWiFi() {
-  Serial.println("Connecting to WiFi...");
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+void setupWiFiAP() {
+  Serial.println("Creating Access Point...");
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
+  // Set WiFi mode to Access Point
+  WiFi.mode(WIFI_AP);
 
-  Serial.println("\nWiFi Connected!");
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
+  // Create Access Point with custom name (no password)
+  WiFi.softAP(AP_SSID, AP_PASSWORD);
+
+  Serial.println("Access Point created!");
+  Serial.print("AP IP address: ");
+  Serial.println(WiFi.softAPIP());
+  Serial.println("Connect to: " + String(AP_SSID));
+  Serial.println("No password required!");
+  Serial.println("Dashboard: http://192.168.4.1");
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
@@ -386,8 +389,8 @@ void setup() {
   digitalWrite(RED_LED_PIN, LOW);
   digitalWrite(GREEN_LED_PIN, LOW);
 
-  // Setup WiFi, web server, and WebSocket
-  setupWiFi();
+  // Setup WiFi Access Point, web server, and WebSocket
+  setupWiFiAP();
   setupWebServer();
 
   // Setup WebSocket

@@ -2,9 +2,23 @@
 
 ## Prerequisites
 
-- macOS (for this workshop)
+- **macOS**, **Linux**, or **Windows** (for this workshop)
 - Python 3.7+ installed
 - Cursor IDE installed
+
+## Quick Setup (Recommended)
+
+### macOS & Linux
+```bash
+bash setup.sh
+```
+
+### Windows (PowerShell)
+```powershell
+powershell setup.ps1
+```
+
+## Manual Setup
 
 ## Step 1: Install PlatformIO
 
@@ -40,6 +54,11 @@ pio --version
   brew install --cask wch-ch34x-usb-serial-driver
   ```
 
+### For Windows:
+- Install CH340 drivers: `choco install ch340-driver -y`
+- Or install CP2102 drivers: `choco install cp2102-driver -y`
+- Or download from manufacturer website
+
 ## Step 4: Test Your Setup
 
 1. Clone this repository
@@ -52,13 +71,16 @@ pio --version
 
 ### Serial Monitor Issues
 - **Baud Rate**: Always use 115200
-- **Port**: Check `/dev/tty.usbserial-*` or `/dev/tty.SLAB_USBtoUART`
-- **Permission**: Run `sudo chmod 666 /dev/tty.usbserial-*`
+- **Port (macOS)**: Check `/dev/tty.usbserial-*` or `/dev/tty.SLAB_USBtoUART`
+- **Port (Windows)**: Check `COM3`, `COM4`, etc.
+- **Permission (macOS)**: Run `sudo chmod 666 /dev/tty.usbserial-*`
 
 ### Upload Issues
 - **Hold Reset Button**: Press and hold RESET button, then press and hold BOOT button, release RESET, then release BOOT
 - **Wrong Port**: Check `pio device list` to find correct port
-- **Driver Issues**: Reinstall CH340 drivers
+- **Driver Issues**: 
+  - **macOS**: Reinstall CH340 drivers
+  - **Windows**: Install CH340 or CP2102 drivers
 
 ### WiFi Issues
 - **SSID**: Update `WIFI_SSID` in `platformio.ini`

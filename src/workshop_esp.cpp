@@ -7,39 +7,20 @@ WorkshopESP::WorkshopESP() {
 
   server = new ESP8266WebServer(80);
 
-  // Temporarily disable OLED to avoid I2C/SPI pin conflicts
-  // Wire.begin(OLED_SDA, OLED_SCL);
-  // display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire,
-  // OLED_RESET);
-  display = nullptr; // Disable display for now
+  Wire.begin(OLED_SDA, OLED_SCL);
+  display =
+      new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-  // Initialize RFID pins - Try GPIO4 for SS
-  rfidSSPin = 2;  // GPIO2 (SS/CS) - D4 pin
-  rfidRSTPin = 0; // GPIO0 (RST) - D3 pin
-
-  Serial.printf("Constructor: Set rfidSSPin = D%d, rfidRSTPin = D%d\n",
-                rfidSSPin, rfidRSTPin);
-  Serial.printf("Constructor: D4 = %d, D8 = %d\n", D4, D8);
-
-  // Initialize RFID with GPIO2 for SS
-  rfid = new MFRC522(rfidSSPin, rfidRSTPin);
-
-  Serial.printf("After RFID init: rfidSSPin = GPIO%d, rfidRSTPin = GPIO%d\n",
-                rfidSSPin, rfidRSTPin);
-
-  // Initialize member variables - DISABLE LEDs to save power
-  redLEDPin = -1;   // Disabled to save power
-  greenLEDPin = -1; // Disabled to save power
+  redLEDPin = D2;
+  greenLEDPin = D3;
   redLEDState = false;
   greenLEDState = false;
-  otaPassword = "workshop123";
 }
 
 WorkshopESP::~WorkshopESP() {
   delete server;
   if (display != nullptr)
     delete display;
-  delete rfid;
 }
 
 void WorkshopESP::setupWiFi(const char *ssid, const char *password) {
@@ -146,6 +127,78 @@ void WorkshopESP::setupWiFi(const char *ssid, const char *password) {
   Serial.println("WiFi setup complete");
 }
 
+void WorkshopESP::setupWiFiAP(const char *apSSID, const char *apPassword) {
+  this->ssid = apSSID;
+  this->password = apPassword;
+
+  Serial.println("Creating WiFi Access Point...");
+
+  // Display AP creation start
+  display->clearDisplay();
+  display->setTextSize(1);
+  display->setTextColor(SSD1306_WHITE);
+  display->setCursor(0, 0);
+  display->println("Creating AP");
+  display->setCursor(0, 15);
+  display->printf("SSID: %s", apSSID);
+  display->setCursor(0, 30);
+  display->println("Initializing...");
+  display->display();
+
+  // Set WiFi mode to Access Point
+  WiFi.mode(WIFI_AP);
+  delay(100);
+
+  Serial.println("WiFi mode set to AP");
+
+  // Create Access Point
+  bool apCreated = WiFi.softAP(apSSID, apPassword);
+
+  if (apCreated) {
+    Serial.println("\nAccess Point Created Successfully!");
+    Serial.print("AP IP Address: ");
+    Serial.println(WiFi.softAPIP());
+    Serial.println("Connect to: " + String(apSSID));
+    Serial.println("No password required!");
+    Serial.println("Dashboard: http://192.168.4.1");
+
+    // Display success message
+    display->clearDisplay();
+    display->setTextSize(1);
+    display->setTextColor(SSD1306_WHITE);
+    display->setCursor(0, 0);
+    display->println("AP Created!");
+    display->setCursor(0, 15);
+    display->printf("SSID: %s", apSSID);
+    display->setCursor(0, 30);
+    display->printf("IP: %s", WiFi.softAPIP().toString().c_str());
+    display->setCursor(0, 45);
+    display->println("No password!");
+    display->setCursor(0, 55);
+    display->println("Ready!");
+    display->display();
+    delay(2000);
+
+  } else {
+    Serial.println("\nAccess Point Creation Failed!");
+
+    // Display failure message
+    display->clearDisplay();
+    display->setTextSize(1);
+    display->setTextColor(SSD1306_WHITE);
+    display->setCursor(0, 0);
+    display->println("AP Failed!");
+    display->setCursor(0, 15);
+    display->println("Check settings");
+    display->setCursor(0, 30);
+    display->println("Continuing offline");
+    display->display();
+    delay(2000);
+  }
+
+  Serial.println("WiFi AP setup complete");
+}
+
 void WorkshopESP::setupWebServer() {
   // Root page
   server->on("/", [this]() { handleRoot(); });
@@ -168,36 +221,6 @@ void WorkshopESP::setupWebServer() {
 
   server->begin();
   Serial.println("Web server started");
-}
-
-void WorkshopESP::setupOTA() {
-  ArduinoOTA.setHostname("workshop-esp");
-  ArduinoOTA.setPassword(otaPassword);
-
-  ArduinoOTA.onStart([]() { Serial.println("OTA Update Started"); });
-
-  ArduinoOTA.onEnd([]() { Serial.println("OTA Update Finished"); });
-
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("OTA Progress: %u%%\n", (progress / (total / 100)));
-  });
-
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("OTA Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR)
-      Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR)
-      Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR)
-      Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR)
-      Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR)
-      Serial.println("End Failed");
-  });
-
-  ArduinoOTA.begin();
-  Serial.println("OTA Ready");
 }
 
 void WorkshopESP::setupDisplay() {
@@ -236,66 +259,44 @@ void WorkshopESP::setupLEDs() {
   Serial.println("LEDs initialized");
 }
 
-void WorkshopESP::setupRFID() {
-  Serial.println("Setting up RFID with custom SPI pins...");
+// Test RFID reader with multiple attempts
+Serial.println("Testing RFID communication...");
+byte version = 0xFF;
 
-  // Initialize SPI with custom pins to avoid OLED conflict
-  // Default ESP8266 SPI: MOSI=13, MISO=12, SCK=14
-  // OLED uses: SDA=14, SCL=12 (conflict!)
-  // Solution: Use different pins for RFID SPI
-
-  // Simple SPI initialization - let MFRC522 handle the pins
-  SPI.begin();
-  rfid->PCD_Init();
-
-  Serial.println("RFID RC522 initialized");
-  Serial.printf("RFID SS Pin: GPIO%d (correct!)\n", rfidSSPin);
-  Serial.printf("RFID RST Pin: GPIO%d (correct!)\n", rfidRSTPin);
-  Serial.println("Note: Using GPIO numbers directly, not D pin names");
-  Serial.println("OLED I2C: SDA=D5(GPIO14), SCL=D6(GPIO12)");
-  Serial.println(
-      "SPI Default: MOSI=D7(GPIO13), MISO=D6(GPIO12), SCK=D5(GPIO14)");
-
-  // Test RFID reader with multiple attempts
-  Serial.println("Testing RFID communication...");
-  byte version = 0xFF;
-
-  for (int i = 0; i < 5; i++) {
-    version = rfid->PCD_ReadRegister(rfid->VersionReg);
-    Serial.printf("Attempt %d: MFRC522 Version: 0x%02X\n", i + 1, version);
-    if (version != 0xFF && version != 0x00) {
-      Serial.println("SUCCESS: Valid version detected!");
-      break;
-    }
-    delay(100);
+for (int i = 0; i < 5; i++) {
+  version = rfid->PCD_ReadRegister(rfid->VersionReg);
+  Serial.printf("Attempt %d: MFRC522 Version: 0x%02X\n", i + 1, version);
+  if (version != 0xFF && version != 0x00) {
+    Serial.println("SUCCESS: Valid version detected!");
+    break;
   }
+  delay(100);
+}
 
-  // Additional debugging
-  Serial.printf("SPI Settings: MOSI=GPIO13, MISO=GPIO12, SCK=GPIO14\n");
-  Serial.printf("OLED I2C: SDA=GPIO14, SCL=GPIO12 (CONFLICT!)\n");
-  Serial.printf("RFID SS=GPIO%d, RST=GPIO%d\n", rfidSSPin, rfidRSTPin);
+// Additional debugging
+Serial.printf("SPI Settings: MOSI=GPIO13, MISO=GPIO12, SCK=GPIO14\n");
+Serial.printf("OLED I2C: SDA=GPIO14, SCL=GPIO12 (CONFLICT!)\n");
+Serial.printf("RFID SS=GPIO%d, RST=GPIO%d\n", rfidSSPin, rfidRSTPin);
 
-  if (version == 0x00 || version == 0xFF) {
-    Serial.println("WARNING: RFID reader may not be connected properly!");
-    Serial.println("Possible causes:");
-    Serial.println("1. Pin conflicts with OLED I2C");
-    Serial.println("2. Wrong wiring");
-    Serial.println("3. Power issues");
-    Serial.println("4. SPI communication failure");
-  } else {
-    Serial.println("RFID reader is working correctly");
-  }
+if (version == 0x00 || version == 0xFF) {
+  Serial.println("WARNING: RFID reader may not be connected properly!");
+  Serial.println("Possible causes:");
+  Serial.println("1. Pin conflicts with OLED I2C");
+  Serial.println("2. Wrong wiring");
+  Serial.println("3. Power issues");
+  Serial.println("4. SPI communication failure");
+} else {
+  Serial.println("RFID reader is working correctly");
+}
 
-  delay(1000);
+delay(1000);
 }
 
 void WorkshopESP::start() {
   setupWiFi(ssid, password);
   setupWebServer();
-  setupOTA();
   setupDisplay();
   setupLEDs();
-  setupRFID();
 
   Serial.println("WorkshopESP initialized successfully!");
   displayMessage("Ready for Workshop!", false);
@@ -734,67 +735,4 @@ String WorkshopESP::getSystemStatusJSON() {
   return json;
 }
 
-void WorkshopESP::handleClient() {
-  server->handleClient();
-  ArduinoOTA.handle();
-}
-
-bool WorkshopESP::checkRFID() {
-  // Look for new cards
-  if (!rfid->PICC_IsNewCardPresent()) {
-    return false;
-  }
-
-  // Select one of the cards
-  if (!rfid->PICC_ReadCardSerial()) {
-    return false;
-  }
-
-  return true;
-}
-
-String WorkshopESP::getRFIDUID() {
-  String uid = "";
-  for (byte i = 0; i < rfid->uid.size; i++) {
-    if (rfid->uid.uidByte[i] < 0x10) {
-      uid += "0";
-    }
-    uid += String(rfid->uid.uidByte[i], HEX);
-  }
-  uid.toUpperCase();
-  return uid;
-}
-
-void WorkshopESP::debugPinValues() {
-  Serial.println("=== PIN DEBUG ===");
-  Serial.printf("rfidSSPin = GPIO%d (was D4=%d)\n", rfidSSPin, D4);
-  Serial.printf("rfidRSTPin = GPIO%d (was D8=%d)\n", rfidRSTPin, D8);
-  Serial.printf("D4 = %d, D8 = %d\n", D4, D8);
-  Serial.println("================");
-}
-
-void WorkshopESP::displayRFIDInfo() {
-  // Check if a new card is present
-  if (!rfid->PICC_IsNewCardPresent()) {
-    return; // No new card, exit early
-  }
-
-  // Try to read the card
-  if (!rfid->PICC_ReadCardSerial()) {
-    return; // Failed to read card
-  }
-
-  // Card detected successfully!
-  String uid = getRFIDUID();
-  Serial.println("RFID Card Detected!");
-  Serial.println("UID: " + uid);
-
-  // Display on OLED
-  String message = "RFID Detected\nUID: " + uid;
-  // displayMessage(message.c_str(), false);
-
-  // Halt PICC
-  rfid->PICC_HaltA();
-  // Stop encryption on PCD
-  rfid->PCD_StopCrypto1();
-}
+void WorkshopESP::handleClient() { server->handleClient(); }

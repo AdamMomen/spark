@@ -1,6 +1,5 @@
 #include "../../src/workshop_esp.h"
 #include <Arduino.h>
-
 // WorkshopESP instance
 WorkshopESP workshop;
 

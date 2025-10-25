@@ -4,12 +4,12 @@ This example demonstrates real-time potentiometer control with WebSocket communi
 
 ## Features
 
+- **Passwordless WiFi**: Creates "IoT-Workshop" Access Point (no router needed)
 - **Real-time Updates**: WebSocket communication for instant potentiometer value updates
-- **Background Color**: Dynamic background color changes based on potentiometer value (Red to Blue gradient)
+- **Modern UI**: Glassmorphism design with animated potentiometer gauge
 - **LED Control**: Combined LED control with potentiometer reading
-- **Voltage Display**: Shows both ADC value (0-1023) and calculated voltage (0-3.3V)
-- **System Status**: Real-time system information display
-- **Mobile Responsive**: Works on desktop and mobile devices
+- **Dynamic Background**: HSL color changes based on potentiometer value
+- **Mobile Responsive**: Touch-friendly interface for all devices
 
 ## Hardware Setup
 
@@ -41,46 +41,47 @@ Green LED: D3 ----[330Ω Resistor]----[LED]----GND
    const char* MEMBER_2 = "Bob";
    ```
 
-2. Update WiFi credentials:
-   ```cpp
-   const char* WIFI_SSID = "WorkshopWiFi";
-   const char* WIFI_PASSWORD = "workshop2025";
-   ```
-
-3. Compile and upload:
+2. Compile and upload:
    ```bash
    pio run -e nodemcuv2 -t upload
    ```
 
 ### Workshop Day
-1. Connect the potentiometer and LEDs as shown in the circuit diagram
-2. Power on the ESP8266 board
-3. Open Serial Monitor (115200 baud) to see connection status
-4. Open browser and go to the IP address shown in Serial Monitor
-5. Turn the potentiometer to see:
-   - Real-time background color changes
-   - ADC value updates (0-1023)
-   - Voltage readings (0-3.3V)
-6. Test LED controls while potentiometer is running
+1. **Connect hardware** as shown in the circuit diagram
+2. **Power on** the ESP8266 board
+3. **Open Serial Monitor** (115200 baud) to see:
+   ```
+   Access Point created!
+   AP IP address: 192.168.4.1
+   Connect to: IoT-Workshop
+   No password required!
+   ```
+4. **Connect your device** to WiFi network "IoT-Workshop" (no password)
+5. **Open browser** and go to `http://192.168.4.1`
+6. **Turn the potentiometer** to see:
+   - Animated gauge needle rotation
+   - Dynamic HSL background colors
+   - Real-time ADC value updates
+7. **Test LED controls** while potentiometer is running
 
 ## Web Interface Features
 
 ### Real-time Potentiometer Display
-- **ADC Value**: Shows raw analog reading (0-1023)
-- **Voltage**: Calculated voltage (0-3.3V)
-- **Background Color**: Smooth color transition from red to blue
+- **Animated Gauge**: Circular potentiometer with rotating needle
+- **ADC Value**: Large display of raw analog reading (0-1023)
+- **Dynamic Background**: HSL color changes based on potentiometer value
 - **Update Rate**: 100ms intervals via WebSocket
 
 ### LED Control Panel
-- **Red LED Toggle**: Turn red LED on/off
-- **Green LED Toggle**: Turn green LED on/off
-- **Status Display**: Shows current LED states
+- **Modern Buttons**: Gradient buttons with hover effects
+- **Real-time Status**: Visual indicators with color coding
+- **Smooth Animations**: Glassmorphism effects and transitions
 
-### System Information
-- **WiFi Status**: Connection status
-- **Uptime**: System running time
-- **Free Memory**: Available RAM
-- **LED States**: Current LED status
+### Access Point Features
+- **Network Name**: "IoT-Workshop" (no password required)
+- **IP Address**: Always 192.168.4.1
+- **Multiple Devices**: Supports multiple simultaneous connections
+- **Workshop Ready**: No router or venue WiFi needed
 
 ## Technical Details
 
@@ -112,11 +113,19 @@ float voltage = (potValue / 1023.0) * 3.3;  // Convert to voltage (0-3.3V)
 - Test with multimeter for voltage changes
 - Check for loose breadboard connections
 
+### Access Point Connection Issues
+- Check if "IoT-Workshop" network appears in WiFi settings
+- Ensure ESP8266 is powered on and code uploaded
+- Try disconnecting and reconnecting to the network
+- Check Serial Monitor for "Access Point created!" message
+- Verify IP address is 192.168.4.1
+
 ### WebSocket Connection Failed
 - Verify WebSocket port 81 is open
 - Check browser console for errors
-- Ensure same network as ESP8266
+- Ensure connected to "IoT-Workshop" network
 - Try refreshing the page
+- Check if multiple devices are connected to same ESP8266
 
 ### Background Color Not Changing
 - Check browser JavaScript console

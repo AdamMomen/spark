@@ -15,18 +15,10 @@ class WorkshopESP {
 private:
   ESP8266WebServer *server;
   Adafruit_SSD1306 *display;
-  MFRC522 *rfid;
 
   // LED pins
   int redLEDPin;
   int greenLEDPin;
-
-  // RFID pins
-  int rfidSSPin;
-  int rfidRSTPin;
-  int rfidMOSIPin;
-  int rfidMISOPin;
-  int rfidSCKPin;
 
   // LED states
   bool redLEDState;
@@ -52,11 +44,11 @@ public:
 
   // Setup methods
   void setupWiFi(const char *ssid, const char *password);
+  void setupWiFiAP(const char *apSSID, const char *apPassword);
   void setupWebServer();
   void setupOTA();
   void setupDisplay();
   void setupLEDs();
-  void setupRFID();
   void start();
 
   // LED control methods
@@ -90,12 +82,6 @@ public:
   // Complete animation sequence
   void playCompleteAnimation(const char *teamName, const char *member1,
                              const char *member2, const char *member3);
-
-  // RFID methods
-  bool checkRFID();
-  String getRFIDUID();
-  void displayRFIDInfo();
-  void debugPinValues(); // Add debug method
 };
 
 #endif

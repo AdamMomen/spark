@@ -54,14 +54,6 @@ ESP8266 Board:
 - ESP8266 A0 pin (analog input)
 - Ground connection
 
-### Breadboard Layout
-
-```
-ESP8266 Board:
-    3.3V ----[1kΩ Pot]----GND
-              |
-              A0
-```
 
 **Wiring Steps:**
 1. Connect ESP8266 3.3V to breadboard positive rail
@@ -154,6 +146,34 @@ void loop() {
 - Smooth changes when turning potentiometer
 - No erratic readings or noise
 
+## WiFi Access Point Setup
+
+### Creating a Passwordless Network
+
+Instead of connecting to an existing WiFi network, we'll create our own Access Point (AP) that students can connect to directly:
+
+```cpp
+#include <ESP8266WiFi.h>
+
+void setupWiFiAP() {
+  // Create Access Point with custom name
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP("IoT-Workshop", "");  // No password (empty string)
+  
+  Serial.println("Access Point created!");
+  Serial.print("AP IP address: ");
+  Serial.println(WiFi.softAPIP());
+  Serial.println("Connect to: IoT-Workshop");
+  Serial.println("No password required!");
+}
+```
+
+**Benefits of Access Point Mode:**
+- **No Router Required**: Students connect directly to ESP8266
+- **Passwordless**: No need to share WiFi credentials
+- **Workshop Friendly**: Each team has their own network
+- **Reliable**: No dependency on venue WiFi
+
 ## WebSocket Server Setup
 
 ### WebSocket Library
@@ -205,8 +225,8 @@ void setup() {
   pinMode(redLEDPin, OUTPUT);
   pinMode(greenLEDPin, OUTPUT);
   
-  // Setup WiFi
-  setupWiFi();
+  // Setup WiFi Access Point
+  setupWiFiAP();
   
   // Setup web server
   server.on("/", handleRoot);
@@ -377,15 +397,38 @@ void handlePotRead() {
 
 ## Testing Real-Time Updates
 
-1. Upload the code to your ESP8266
-2. Open Serial Monitor (115200 baud)
-3. Note the IP address (e.g., 192.168.1.100)
-4. Open browser and go to `http://192.168.1.100`
-5. Turn the potentiometer and watch:
-   - Background color changes (red to blue)
-   - Potentiometer value updates
-   - Voltage reading changes
-6. Test LED controls while potentiometer is running
+### Step-by-Step Testing
+
+1. **Upload the code** to your ESP8266
+2. **Open Serial Monitor** (115200 baud)
+3. **Look for Access Point creation**:
+   ```
+   Access Point created!
+   AP IP address: 192.168.4.1
+   Connect to: IoT-Workshop
+   No password required!
+   ```
+4. **Connect your device** to WiFi network "IoT-Workshop" (no password)
+5. **Open browser** and go to `http://192.168.4.1`
+6. **Turn the potentiometer** and watch:
+   - Background color changes dynamically
+   - Potentiometer value updates in real-time
+   - Animated needle rotates smoothly
+7. **Test LED controls** while potentiometer is running
+
+### Workshop Setup Tips
+
+**For Instructors:**
+- Each team's ESP8266 creates its own "IoT-Workshop" network
+- Students connect to their team's specific device
+- No need to share venue WiFi credentials
+- Each team works independently
+
+**For Students:**
+- Look for "IoT-Workshop" in your WiFi settings
+- Connect without entering a password
+- Use the IP address shown in Serial Monitor
+- If multiple teams, connect to your team's specific device
 
 ## Troubleshooting
 
@@ -395,11 +438,19 @@ void handlePotRead() {
 - Test with multimeter for voltage changes
 - Check for loose breadboard connections
 
+### Access Point Connection Issues
+- Check if "IoT-Workshop" network appears in WiFi settings
+- Ensure ESP8266 is powered on and code uploaded
+- Try disconnecting and reconnecting to the network
+- Check Serial Monitor for "Access Point created!" message
+- Verify IP address is 192.168.4.1
+
 ### WebSocket Connection Failed
 - Verify WebSocket port 81 is open
 - Check browser console for errors
-- Ensure same network as ESP8266
+- Ensure connected to "IoT-Workshop" network
 - Try refreshing the page
+- Check if multiple devices are connected to same ESP8266
 
 ### Erratic Readings
 - Check for loose connections
