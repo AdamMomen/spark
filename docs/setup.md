@@ -18,7 +18,7 @@ bash setup.sh
 powershell setup.ps1
 ```
 
-## Manual Setup
+## Manual Setup 
 
 ## Step 1: Install PlatformIO
 
