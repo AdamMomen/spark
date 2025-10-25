@@ -4,8 +4,7 @@ ESP8266-based IoT workshop materials for hands-on learning.
 
 ## Workshop Overview
 
-**Date**: October 19, 2025  
-**Venue**: Network School, Johor, Malaysia  
+**Date**: October 26, 2025  
 **Duration**: 4 hours  
 
 **Hardware**: ESP8266
