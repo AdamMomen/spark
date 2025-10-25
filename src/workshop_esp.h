@@ -7,7 +7,6 @@
 #include <ArduinoOTA.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
-#include <MFRC522.h>
 #include <SPI.h>
 #include <Wire.h>
 
@@ -28,9 +27,6 @@ private:
   const char *ssid;
   const char *password;
 
-  // OTA password
-  const char *otaPassword;
-
   // Display settings
   static const int SCREEN_WIDTH = 128;
   static const int SCREEN_HEIGHT = 64;
@@ -46,7 +42,6 @@ public:
   void setupWiFi(const char *ssid, const char *password);
   void setupWiFiAP(const char *apSSID, const char *apPassword);
   void setupWebServer();
-  void setupOTA();
   void setupDisplay();
   void setupLEDs();
   void start();

@@ -1,4 +1,4 @@
-#include "../../src/workshop_esp.h"
+#include "workshop_esp.h"
 #include <Arduino.h>
 // WorkshopESP instance
 WorkshopESP workshop;
@@ -28,7 +28,7 @@ void displayCoolAnimation() {
   // Display animation frames
   for (int frame = 0; frame < 3; frame++) {
     for (int i = 0; i < 10; i++) {
-      workshop.displayMessage(animationFrames[i]);
+      workshop.displayMessage(animationFrames[i], false);
       delay(600);
     }
     delay(1000);
@@ -59,7 +59,7 @@ void displayTeamWelcome() {
 
   // Animate welcome messages
   for (int i = 0; i < 19; i++) {
-    workshop.displayMessage(welcomeMessages[i]);
+    workshop.displayMessage(welcomeMessages[i], false);
     delay(600);
   }
 }
@@ -105,19 +105,19 @@ void displayCoolPatterns() {
 
 void displaySystemInfo() {
   // Display system information
-  workshop.displayMessage("System Ready!");
+  workshop.displayMessage("System Ready!", true);
   delay(1000);
 
-  workshop.displayMessage("WiFi: Connected");
+  workshop.displayMessage("WiFi: Connected", false);
   delay(800);
 
-  workshop.displayMessage("IP: Ready");
+  workshop.displayMessage("IP: Ready", false);
   delay(800);
 
-  workshop.displayMessage("API: Active");
+  workshop.displayMessage("API: Active", false);
   delay(800);
 
-  workshop.displayMessage("Dashboard: Live");
+  workshop.displayMessage("Dashboard: Live", false);
   delay(1000);
 }
 
@@ -156,7 +156,6 @@ void setup() {
   // Initialize WorkshopESP
   workshop.setupWiFi(WIFI_SSID, WIFI_PASSWORD);
   workshop.setupWebServer();
-  workshop.setupOTA();
   workshop.setupDisplay();
   workshop.setupLEDs();
 

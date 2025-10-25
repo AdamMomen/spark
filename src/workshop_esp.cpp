@@ -1,9 +1,7 @@
 #include "workshop_esp.h"
+#include <Arduino.h>
 
 WorkshopESP::WorkshopESP() {
-  Serial.println("CONSTRUCTOR CALLED!");
-  Serial.println("=== NEW CODE VERSION ===");
-  Serial.println("Constructor: RFID pins being set...");
 
   server = new ESP8266WebServer(80);
 
@@ -257,39 +255,6 @@ void WorkshopESP::setupLEDs() {
   digitalWrite(greenLEDPin, LOW);
 
   Serial.println("LEDs initialized");
-}
-
-// Test RFID reader with multiple attempts
-Serial.println("Testing RFID communication...");
-byte version = 0xFF;
-
-for (int i = 0; i < 5; i++) {
-  version = rfid->PCD_ReadRegister(rfid->VersionReg);
-  Serial.printf("Attempt %d: MFRC522 Version: 0x%02X\n", i + 1, version);
-  if (version != 0xFF && version != 0x00) {
-    Serial.println("SUCCESS: Valid version detected!");
-    break;
-  }
-  delay(100);
-}
-
-// Additional debugging
-Serial.printf("SPI Settings: MOSI=GPIO13, MISO=GPIO12, SCK=GPIO14\n");
-Serial.printf("OLED I2C: SDA=GPIO14, SCL=GPIO12 (CONFLICT!)\n");
-Serial.printf("RFID SS=GPIO%d, RST=GPIO%d\n", rfidSSPin, rfidRSTPin);
-
-if (version == 0x00 || version == 0xFF) {
-  Serial.println("WARNING: RFID reader may not be connected properly!");
-  Serial.println("Possible causes:");
-  Serial.println("1. Pin conflicts with OLED I2C");
-  Serial.println("2. Wrong wiring");
-  Serial.println("3. Power issues");
-  Serial.println("4. SPI communication failure");
-} else {
-  Serial.println("RFID reader is working correctly");
-}
-
-delay(1000);
 }
 
 void WorkshopESP::start() {

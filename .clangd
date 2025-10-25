@@ -1,17 +1,122 @@
 CompileFlags:
+  CompilationDatabase: .
   Add:
-    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/cores/esp8266
-    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/variants/nodemcu
-    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/tools/sdk/include
-    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/libraries/ArduinoOTA
-    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WiFi/src
-    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266mDNS/src
+    # ESP8266 Core Definitions
     - -DARDUINO_ARCH_ESP8266
     - -DESP8266
     - -DARDUINO=10805
     - -DF_CPU=80000000L
     - -DPLATFORMIO=60118
-    - -w
+    - -D__ets__
+    - -DICACHE_FLASH
+    - -U__STRICT_ANSI__
+
+    # ESP8266 Type Definitions
+    - -DSSIZE_MAX
+    - -DLWIP_NO_UNISTD_H=1
+    - -Dssize_t=long
+    - -D_SSIZE_T_DECLARED
+
+    # Additional ESP8266 Defines
+    - -DARDUINO_BOARD="PLATFORMIO_NODEMCUV2"
+    - -DARDUINO_BOARD_ID="nodemcuv2"
+    - -DFLASHMODE_DIO
+    - -DLWIP_OPEN_SRC
+    - -DNONOSDK22x_190703=1
+    - -DTCP_MSS=536
+    - -DLWIP_FEATURES=1
+    - -DLWIP_IPV6=0
+    - -DVTABLES_IN_FLASH
+    - -DMMU_IRAM_SIZE=0x8000
+    - -DMMU_ICACHE_SIZE=0x8000
+
+    # Additional include paths for ESP8266
+    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/cores/esp8266
+    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/variants/nodemcu
+    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/libraries
+    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/tools/sdk/include
+    - -I/Users/adam/.platformio/packages/framework-arduinoespressif8266/tools/sdk/lwip2/include
+    - -I/Users/adam/.platformio/packages/toolchain-xtensa/include
+
   Remove:
+    # Remove ESP8266-specific flags that clangd can't handle
     - -mlongcalls
     - -mlong-calls
+    - -mtext-section-literals
+    - -free
+    - -fipa-pta
+    - -fno-tree-switch-conversion
+    - -fstrict-volatile-bitfields
+
+    # Remove other problematic flags
+    - -Wl,--gc-sections
+    - -Wl,--relax
+    - -Wl,--start-group
+    - -Wl,--end-group
+    - -Wl,--as-needed
+    - -Wl,--no-undefined
+
+Diagnostics:
+  Suppress:
+    # Suppress ESP8266-specific false positives
+    - unknown_argument
+    - unknown_warning_option
+    - file_not_found
+    - invalid_type_name
+    - unknown_compiler_flag
+    - implicit_instantiation_of_undefined_template
+    - no_matching_member_function_for_call
+    - no_viable_conversion
+    - delete_called_on_non_final_class_with_virtual_functions
+    - implicit_conversion
+    - static_member_accessed_through_instance
+    - unnecessary_if_statement
+    - statement_should_be_inside_braces
+    - method_can_be_made_const
+    - invalid_width_spec
+    - err_pp_file_not_found
+  ClangTidy:
+    Add:
+      - readability-*
+      - performance-*
+      - modernize-*
+    Remove:
+      - readability-magic-numbers
+      - readability-uppercase-literal-suffix
+      - modernize-use-trailing-return-type
+      - bugprone-*
+      - clang-analyzer-*
+      - readability-braces-around-statements
+      - readability-simplify-boolean-expr
+      - performance-unnecessary-value-param
+      - modernize-use-nodiscard
+  UnusedIncludes: None
+  MissingIncludes: None
+
+Index:
+  Background: Build
+  StandardLibrary: No
+
+Completion:
+  AllScopes: Yes
+  ArgumentLists: FullPlaceholders
+  HeaderInsertion: IWYU
+  CodePatterns: All
+
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
+  Designators: true
+  BlockEnd: false
+  DefaultArguments: false
+  TypeNameLimit: 24
+
+Hover:
+  ShowAKA: false
+  MacroContentsLimit: 2048
+
+Style:
+  FullyQualifiedNamespaces: []
+  QuotedHeaders: ["src/.*"]
+  AngledHeaders: ["framework-arduinoespressif8266/.*", "toolchain-xtensa/.*"]

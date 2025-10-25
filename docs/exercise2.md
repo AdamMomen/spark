@@ -1,4 +1,4 @@
-# Lecture 2: Potentiometer Control and Real-Time Web Updates
+# Exercise 2: Potentiometer Control and Real-Time Web Updates
 
 ## Learning Objectives
 

@@ -367,7 +367,7 @@ elif [[ "$OS" == "macos" ]]; then
 fi
 echo ""
 echo "For workshop materials:"
-echo "- Read docs/lect1.md for LED basics"
+echo "- Read docs/exercise1.md for LED basics"
 echo "- Check docs/api-spec.md for API documentation"
 echo "- Try examples in /examples directory"
 echo ""

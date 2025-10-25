@@ -1,4 +1,4 @@
-# Lecture 1: LED Basics and Web Control
+# Exercise 1: LED Basics and Web Control
 
 ## Learning Objectives
 
@@ -248,6 +248,4 @@ void handleLEDOff() {
 
 ## Next Steps
 
-- Read [api-spec.md](api-spec.md) for REST API development
-- Try examples in `/examples` directory
-- Prepare for dashboard development challenge
+- Read [exercise2.md](exercise2.md) for REST API development

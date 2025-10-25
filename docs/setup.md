@@ -89,6 +89,5 @@ pio --version
 
 ## Next Steps
 
-1. Read [lect1.md](lect1.md) for LED basics
-2. Check [api-spec.md](api-spec.md) for API documentation
-3. Start with examples in `/examples` directory
+1. Read [exercise1.md](exercise1.md) for LED basics
+2. Start with examples in `/examples` directory
