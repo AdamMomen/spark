@@ -33,6 +33,7 @@ ESP8266-based IoT workshop materials for hands-on learning.
 - LEDs (Red, Green)
 - Resistors (320Ω)
 - Potentiometer (1kΩ)
+- M-M Connection Wires
 - Breadboard and jumper wires
 - USB cable
 
